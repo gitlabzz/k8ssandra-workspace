@@ -1,0 +1,40 @@
+apiVersion: k8ssandra.io/v1alpha1
+kind: K8ssandraCluster
+metadata:
+  name: demo
+  namespace: k8ssandra-operator
+spec:
+  cassandra:
+    serverVersion: "4.0.6"
+    storageConfig:
+      cassandraDataVolumeClaimSpec:
+        storageClassName: nfs-client
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 5Gi
+    config:
+      jvmOptions:
+        heapSize: 512M
+    networking:
+      hostNetwork: false
+    datacenters:
+      - metadata:
+          name: dc1
+        size: 1
+        stargate:
+          size: 1
+          heapSize: 256M
+  medusa:
+    storageProperties:
+      storageProvider: s3_compatible
+      storageSecretRef:
+        name: medusa-bucket-key
+      bucketName: k8ssandra-medusa
+      prefix: test
+      host: minio.minio.svc.cluster.local
+      port: 9000
+      secure: false
+
+  reaper: { }

@@ -1,0 +1,65 @@
+cassandra:
+  heap:
+    size: 500m
+    newGenSize: 200m
+  datacenters:
+    - name: dc1
+      size: 2
+  ingress:
+    enabled: false
+
+  stargate:
+    enabled: true
+    replicas: 1
+    heapMB: 300
+    ingress:
+      enabled: true
+    host: stargate.127.0.0.1.nip.io
+    cassandra:
+      enabled: true
+      host:
+
+medusa:
+  enabled: true
+  multiTenant: true
+  storage: s3_compatible
+  storage_properties:
+    host: "minio.minio.svc.cluster. local"
+    port: 9000
+    secure: "False"
+  bucketName: k8ssandra-medusa
+  storageSecret: medusa-bucket-key
+
+reaper-operator:
+  enabled: true
+
+kube-prometheus-stack:
+  enabled: true
+  prometheus:
+    enabled: true
+  prometheusSpec:
+    externalUrl: http://localhost:9090/prometheus
+    routePrefix: /prometheus
+  ingress:
+    enabled: false
+    paths:
+      - /prometheus
+
+grafana:
+  enabled: true
+  ingress:
+    enabled: true
+    path: /grafana
+  adminUser: admin
+  adminPassword: admin123
+  grafana.ini:
+    server:
+    rogt_url: http://localhost:8080/grafana
+    serve_from_sub_path: true
+
+reaper:
+  autoschedule: false
+  enabled: true
+  ingress:
+    enabled: true
+    host: repair.127.0.0.1.nip.io
