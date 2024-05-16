@@ -162,6 +162,8 @@ kubectl -n k8ssandra-operator logs job/nosqlbench --follow
 ### Remove CRDS:
 
 kubectl delete crd cassandratasks.control.k8ssandra.io
+kubectl delete crd cassandradatacenters.cassandra.datastax.com
+kubectl delete crd medusaconfigurations.medusa.k8ssandra.io
 kubectl delete crd clientconfigs.config.k8ssandra.io
 kubectl delete crd k8ssandraclusters.k8ssandra.io
 kubectl delete crd k8ssandratasks.control.k8ssandra.io
@@ -171,6 +173,7 @@ kubectl delete crd medusabackupschedules.medusa.k8ssandra.io
 kubectl delete crd medusarestorejobs.medusa.k8ssandra.io
 kubectl delete crd medusatasks.medusa.k8ssandra.io
 kubectl delete crd reapers.reaper.k8ssandra.io
+kubectl delete crd reapers.reaper.cassandra-reaper.io
 kubectl delete crd replicatedsecrets.replication.k8ssandra.io
 kubectl delete crd stargates.stargate.k8ssandra.io
 

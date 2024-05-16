@@ -1,38 +1,16 @@
-kubectl create namespace minio
+helm repo add minio-operator https://operator.min.io
+helm search repo minio-operator
+helm install --namespace minio-operator --create-namespace operator minio-operator/operator
+kubectl get all -n minio-operator
 
-cat << EOF > medusa-secret.yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: medusa-bucket-key
-  namespace: k8ssandra-operator
-type: Opaque
-stringData:
-  credentials: |-
-    [default]
-    aws_access_key_id = k8ssandra_key
-    aws_secret_access_key = k8ssandra_secret
-EOF
-
-kubectl apply -f medusa-secret.yaml
-
-helm repo remove minio
-
-# OLD
-#helm repo add minio https://helm.min.io
-
-# NEW
-helm repo add minio https://charts.min.io/
-
-helm install --namespace minio --create-namespace minio minio/minio --set replicas=2,accessKey=k8ssandra_key,secretKey=k8ssandra_secret,defaultBucket.enabled=true,defaultBucket.name=k8ssandra-medusa
-
+kubectl get deployments -A --field-selector metadata.name=minio-operator
 
 cat <<EOF >tls-secret.yaml
 apiVersion: v1
 kind: Secret
 metadata:
   name: api-tls-secret
-  namespace: minio
+  namespace: minio-operator
 type: kubernetes.io/tls
 data:
   tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUdDakNDQlBLZ0F3SUJBZ0lVWk9sOTc3UCsvOEtvUlBVQWdiOGFreGZoYVpNd0RRWUpLb1pJaHZjTkFRRUwKQlFBd2daY3hDekFKQmdOVkJBWVRBa0ZWTVF3d0NnWURWUVFJREFOT1UxY3hEekFOQmdOVkJBY01CbE41Wkc1bAplVEVPTUF3R0ExVUVDZ3dGUVhoM1lYa3hIakFjQmdOVkJBc01GWEJ5YjJabGMzTnBiMjVoYkNCelpYSjJhV05sCmN6RVlNQllHQTFVRUF3d1BZWEJwTG1WNFlXMXdiR1V1WTI5dE1SOHdIUVlKS29aSWh2Y05BUWtCRmhCaGJXbHkKZW1GQVlYaDNZWGt1WTI5dE1CNFhEVEl5TURjeE56QXpOVFUxTVZvWERUTXlNRGN4TkRBek5UVTFNVm93Z1pjeApDekFKQmdOVkJBWVRBa0ZWTVF3d0NnWURWUVFJREFOT1UxY3hEekFOQmdOVkJBY01CbE41Wkc1bGVURU9NQXdHCkExVUVDZ3dGUVhoM1lYa3hIakFjQmdOVkJBc01GWEJ5YjJabGMzTnBiMjVoYkNCelpYSjJhV05sY3pFWU1CWUcKQTFVRUF3d1BZWEJwTG1WNFlXMXdiR1V1WTI5dE1SOHdIUVlKS29aSWh2Y05BUWtCRmhCaGJXbHllbUZBWVhoMwpZWGt1WTI5dE1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBdWJKOXVlemdRTWtNCjBDSk94K3BwNDhUbmRZZkZzSndOV243blJLb0RzMUs2SE02Z3BYZitTS2ZkWG9zZEpuUXNlaEF3TVJBbklrOEIKVWRsTXBhTGd1NUVqZ2M2MHF4eU9RQm5UTUR5M00wdFlGTE11OEhtbC85ZmpkNmZWd2hPMGR5NGdBZXoxQVJyNAo1Z2xtWDF4dGQycUl3MXVkenE5dXFuaGlxdmZFR1BKQlZ1MDFJa1B6V0JCUldoaUNGR3ovMjN5VitSSXhVOXhDCnZZNkt3bXJlTWo2bUd0L3orZ0VYZjFhZEVjWlZabWpNK0EvRTF6YS8wQ3dTR2ZhY21va0FZbTRPaWRWVk1mbW8KbGNQRW0rUEw2QVpyMFpWUm1uRjN4S3crT3YrVEtFTGtlV2hFTDdtc1l0ZHQwSTVLQXBPaHlZYUZ3ZStHQy9HSApXWnZqRFB2SWZ3SURBUUFCbzRJQ1NqQ0NBa1l3SFFZRFZSME9CQllFRkFNRytWeXJTRExaV2xOMWEwTnFNVnpHCit6Z0lNSUhYQmdOVkhTTUVnYzh3Z2N5QUZBTUcrVnlyU0RMWldsTjFhME5xTVZ6Ryt6Z0lvWUdkcElHYU1JR1gKTVFzd0NRWURWUVFHRXdKQlZURU1NQW9HQTFVRUNBd0RUbE5YTVE4d0RRWURWUVFIREFaVGVXUnVaWGt4RGpBTQpCZ05WQkFvTUJVRjRkMkY1TVI0d0hBWURWUVFMREJWd2NtOW1aWE56YVc5dVlXd2djMlZ5ZG1salpYTXhHREFXCkJnTlZCQU1NRDJGd2FTNWxlR0Z0Y0d4bExtTnZiVEVmTUIwR0NTcUdTSWIzRFFFSkFSWVFZVzFwY25waFFHRjQKZDJGNUxtTnZiWUlVWk9sOTc3UCsvOEtvUlBVQWdiOGFreGZoYVpNd0RBWURWUjBUQkFVd0F3RUIvekFMQmdOVgpIUThFQkFNQ0F2d3dnWllHQTFVZEVRU0JqakNCaTRJTFpYaGhiWEJzWlM1amIyMkNEU291WlhoaGJYQnNaUzVqCmIyMkNFVzVuYVc1NExtVjRZVzF3YkdVdVkyOXRnZzloYm0wdVpYaGhiWEJzWlM1amIyMkNFR0Z3YVcwdVpYaGgKYlhCc1pTNWpiMjJDRTNSeVlXWm1hV011WlhoaGJYQnNaUzVqYjIyQ0QyRndhUzVsZUdGdGNHeGxMbU52YllJUgpiMkYxZEdndVpYaGhiWEJzWlM1amIyMHdnWllHQTFVZEVnU0JqakNCaTRJTFpYaGhiWEJzWlM1amIyMkNEU291ClpYaGhiWEJzWlM1amIyMkNFVzVuYVc1NExtVjRZVzF3YkdVdVkyOXRnZzloYm0wdVpYaGhiWEJzWlM1amIyMkMKRUdGd2FXMHVaWGhoYlhCc1pTNWpiMjJDRTNSeVlXWm1hV011WlhoaGJYQnNaUzVqYjIyQ0QyRndhUzVsZUdGdApjR3hsTG1OdmJZSVJiMkYxZEdndVpYaGhiWEJzWlM1amIyMHdEUVlKS29aSWh2Y05BUUVMQlFBRGdnRUJBQ25uCkVVSHZZMXVReldacnpwSGRSUnJqNWI0MDZkUTFzYWttV3dPeEl1aXBvZlU2aGQxSGdiZTlRZnd3TWNuMEdyVEsKRE5STnF0enNGRVZxOWZ3MUFDd3ZOT2dkeXRUTEp5MVU3ZG1CWFA4T2E2dzlWOC9oRTNOMjdCLzcyZzFTMmx6QQpoSmtvaFhJem5sK1E2aDlRL3FtUGdudEdOL3RqL0RrOHVpNmRwb1c3cElZQ0diV2JuMkd4SGFQdnk4TVFGbjNsCnZjTkt2K1NZZkJpUmtBMTNOUVJWUHpKdlplWTdGTDV4WXgzQlNkaWh5YTdwZzUvR21BL3RMV0psUG81MGQwRkkKeXh3UXdaaFFHY1N0YUE4bTMwb0NnYisyM0ZsWlRKZDZ6SW8zUmxmNUp3b2NBOTJqbFFaWGZXYkNVWkF1MnVjUwpqTVZZK2R4RWkvcloxeTZibW0wPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
@@ -42,12 +20,14 @@ EOF
 
 kubectl apply -f tls-secret.yaml
 
-cat << EOF > minio-console-ingress.yaml
+cat <<EOF >console-ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: minio-ingress
-  namespace: minio
+  name: console-ingress
+  namespace: minio-operator
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
   rules:
@@ -58,14 +38,35 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: minio-console
+                name: console
                 port:
-                  number: 9001
+                  number: 9090
   tls:
     - hosts:
         - console.172.16.236.200.nip.io
-    - secretName: api-tls-secret
+      secretName: api-tls-secret
 EOF
 
+kubectl apply -f console-ingress.yaml
 
-kubectl apply -f minio-console-ingress.yaml
+kubectl get secret/console-sa-secret -n minio-operator -o json | jq -r ".data.token" | base64 -d
+
+cat <<EOF >minio-client.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: minio-client
+  name: minio-client
+  namespace: minio-operator
+spec:
+  containers:
+    - name: minio-client
+      image: minio/mc
+      command: [ "bash", "-c" ]
+      args:
+        - |
+          sleep 60
+EOF
+kubectl apply -f minio-client.yaml
+
